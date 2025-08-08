@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Map Typing Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS for the Dark Blue Theme and Poppins Font */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a202c; /* Dark blue background */
+            color: #e2e8f0; /* Light gray text */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better Notion embedding */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+
+        .game-container {
+            background-color: #2d3748; /* Slightly lighter dark blue for container */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 800px; /* Adjust as needed for Notion embed */
+        }
+
+        h1 {
+            color: #63b3ed; /* A nice blue for the heading */
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .timer, .country-count {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        #country-input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background-color: #4a5568;
+            color: #e2e8f0;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+
+        #country-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .feedback {
+            min-height: 1.5em; /* To prevent layout shift */
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            color: #48bb78; /* Green for correct */
+        }
+
+        .feedback.incorrect {
+            color: #f56565; /* Red for incorrect */
+        }
+
+        .map-container {
+            width: 100%;
+            /* Maintain aspect ratio for the map - 2:1 for a world map */
+            padding-bottom: 50%; /* 50% of width for 2:1 aspect ratio */
+            position: relative;
+            background-color: #3b4556; /* Placeholder for map area */
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden; /* Ensure map doesn't spill over */
+        }
+
+        .map-container svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block; /* Remove extra space below SVG */
+        }
+
+        /* Styling for the SVG map countries */
+        .country {
+            fill: #63b3ed; /* Default country color */
+            stroke: #2d3748; /* Border between countries */
+            stroke-width: 0.5px;
+            transition: fill 0.2s ease-in-out;
+            pointer-events: none; /* Make countries unclickable */
+        }
+
+        .country.found {
+            fill: #48bb78; /* Green for found countries */
+        }
+
+        button {
+            background-color: #63b3ed; /* Button primary color */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            margin: 0 5px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #4299e1; /* Darker blue on hover */
+        }
+
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Type the Countries!</h1>
+        <div class="timer">Time: <span id="time-display">00:00</span></div>
+        <div class="country-count">Found: <span id="found-count">0</span> / <span id="total-count"></span></div>
+        <input type="text" id="country-input" placeholder="Start typing country names..." autofocus disabled>
+        <div id="feedback-message" class="feedback"></div>
+        <div class="map-container" id="map-container">
+            <svg viewBox="0 0 1000 500">
+                <rect x="0" y="0" width="1000" height="500" fill="#3b4556"/>
+                <circle cx="200" cy="250" r="100" fill="#63b3ed" class="country" id="americas_placeholder"></circle>
+                <circle cx="500" cy="250" r="120" fill="#63b3ed" class="country" id="europe_africa_placeholder"></circle>
+                <circle cx="800" cy="250" r="90" fill="#63b3ed" class="country" id="asia_australia_placeholder"></circle>
+                <text x="500" y="250" font-family="Poppins" font-size="25" fill="#e2e8f0" text-anchor="middle" alignment-baseline="middle">World Map Placeholder</text>
+                <text x="500" y="280" font-family="Poppins" font-size="15" fill="#a0aec0" text-anchor="middle" alignment-baseline="middle">(Replace with a detailed SVG for country highlighting)</text>
+            </svg>
+        </div>
+        <button id="start-button">Start Game</button>
+        <button id="reset-button" style="display:none;">Reset Game</button>
+    </div>
+
+    <script>
+        const countryInput = document.getElementById('country-input');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const timeDisplay = document.getElementById('time-display');
+        const foundCountDisplay = document.getElementById('found-count');
+        const totalCountDisplay = document.getElementById('total-count');
+        const startButton = document.getElementById('start-button');
+        const resetButton = document.getElementById('reset-button');
+
+        let allCountries = []; // This will store our country data
+        let foundCountries = new Set();
+        let startTime;
+        let timerInterval;
+        let gameRunning = false;
+
+        // Comprehensive list of countries for the game
+        // Source: Based on UN member states and commonly recognized countries.
+        // Aliases are included in a set for easier lookup.
+        const countryData = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia",
+            "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
+            "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria",
+            "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad",
+            "Chile", "China", "Colombia", "Comoros", "Congo, Dem. Rep.", "Congo, Rep.", "Costa Rica", "Croatia", "Cuba",
+            "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt",
+            "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France",
+            "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
+            "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel",
+            "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North",
+            "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
+            "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta",
+            "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia",
+            "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand",
+            "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama",
+            "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia",
+            "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+            "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia",
+            "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", Suriname",
+            "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga",
+            "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates",
+            "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam",
+            "Yemen", "Zambia", "Zimbabwe"
+        ];
+
+        // Mappings for common aliases to their official names
+        const countryAliases = {
+            "usa": "United States",
+            "uk": "United Kingdom",
+            "drc": "Congo, Dem. Rep.",
+            "congo dem rep": "Congo, Dem. Rep.",
+            "congo rep": "Congo, Rep.",
+            "ivory coast": "Ivory Coast",
+            "north korea": "Korea, North",
+            "south korea": "Korea, South",
+            "eswatini": "Eswatini",
+            "myanmar": "Myanmar",
+            "palestine": "Palestine",
+            "russia": "Russia",
+            "tanzania": "Tanzania",
+            "turkey": "Turkey",
+            "uae": "United Arab Emirates",
+            "vatican": "Vatican City",
+            "east timor": "Timor-Leste",
+            "saint kitts and nevis": "Saint Kitts and Nevis",
+            "saint lucia": "Saint Lucia",
+            "saint vincent and the grenadines": "Saint Vincent and the Grenadines",
+            "macedonia": "North Macedonia", // Old name
+            "czech republic": "Czechia", // Old name
+        };
+
+
+        function initializeGameData() {
+            allCountries = countryData.map(c => c.toLowerCase());
+            totalCountDisplay.textContent = allCountries.length;
+        }
+
+        function startGame() {
+            if (gameRunning) return; // Prevent multiple starts
+
+            gameRunning = true;
+            foundCountries.clear();
+            foundCountDisplay.textContent = 0;
+            countryInput.value = '';
+            feedbackMessage.textContent = '';
+            startButton.style.display = 'none';
+            resetButton.style.display = 'inline-block';
+            countryInput.disabled = false;
+            countryInput.focus();
+
+            // Reset map colors for all placeholder paths
+            document.querySelectorAll('.country').forEach(path => {
+                path.classList.remove('found');
+            });
+
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function endGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            countryInput.disabled = true;
+            feedbackMessage.textContent = `Congratulations! You found all ${allCountries.length} countries in ${timeDisplay.textContent}!`;
+            feedbackMessage.className = 'feedback correct'; // Ensure it's green
+            resetButton.textContent = 'Play Again';
+        }
+
+        function updateTimer() {
+            const elapsedTime = Date.now() - startTime;
+            const minutes = Math.floor(elapsedTime / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            timeDisplay.textContent =
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function checkCountry() {
+            const rawInputText = countryInput.value.trim();
+            const lowerCaseInput = rawInputText.toLowerCase();
+            countryInput.value = ''; // Clear input after submission
+
+            if (!gameRunning) return;
+
+            if (lowerCaseInput === '') {
+                feedbackMessage.textContent = ''; // Clear message if nothing typed
+                return;
+            }
+
+            // Check if the input is a direct match
+            let matchedCountry = allCountries.find(country => country === lowerCaseInput);
+
+            // If not a direct match, check if it's an alias
+            if (!matchedCountry && countryAliases[lowerCaseInput]) {
+                matchedCountry = countryAliases[lowerCaseInput].toLowerCase(); // Use the official name from alias
+            }
+
+            if (matchedCountry) {
+                if (!foundCountries.has(matchedCountry)) {
+                    foundCountries.add(matchedCountry);
+                    feedbackMessage.textContent = `"${rawInputText.toUpperCase()}" found!`;
+                    feedbackMessage.className = 'feedback correct';
+                    foundCountDisplay.textContent = foundCountries.size;
+
+                    // CONCEPT FOR HIGHLIGHTING COUNTRY ON MAP:
+                    // This part needs a real SVG map with correctly ID'd country paths.
+                    // For the placeholder SVG, we'll just highlight the large placeholder circles.
+                    // If you replace the SVG, ensure country paths have data-name="country_name_lowercase"
+                    // Example:
+                    // const countryPath = document.querySelector(`.country[data-name="${matchedCountry.replace(/\s/g, '-')}"]`);
+                    // if (countryPath) {
+                    //     countryPath.classList.add('found');
+                    // }
+                    // For the placeholder circles, we'll apply a simple logic for demonstration:
+                    if (foundCountries.size <= 20) { // Highlight first placeholder initially
+                        document.getElementById('americas_placeholder')?.classList.add('found');
+                    } else if (foundCountries.size <= 80) { // Then second
+                        document.getElementById('europe_africa_placeholder')?.classList.add('found');
+                    } else if (foundCountries.size <= allCountries.length) { // Then third
+                        document.getElementById('asia_australia_placeholder')?.classList.add('found');
+                    }
+
+
+                    if (foundCountries.size === allCountries.length) {
+                        endGame();
+                    }
+                } else {
+                    feedbackMessage.textContent = `"${rawInputText.toUpperCase()}" already found!`;
+                    feedbackMessage.className = 'feedback incorrect';
+                }
+            } else {
+                feedbackMessage.textContent = `"${rawInputText.toUpperCase()}" is not a recognized country.`;
+                feedbackMessage.className = 'feedback incorrect';
+            }
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            gameRunning = false;
+            foundCountries.clear();
+            foundCountDisplay.textContent = 0;
+            timeDisplay.textContent = '00:00';
+            countryInput.value = '';
+            feedbackMessage.textContent = '';
+            countryInput.disabled = true;
+            startButton.style.display = 'inline-block';
+            resetButton.style.display = 'none';
+            resetButton.textContent = 'Reset Game'; // Reset button text
+
+            // Remove 'found' class from all placeholder paths
+            document.querySelectorAll('.country').forEach(path => {
+                path.classList.remove('found');
+            });
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', startGame);
+        resetButton.addEventListener('click', resetGame);
+        countryInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                checkCountry();
+            }
+        });
+
+        // Initialize the game when the page loads
+        initializeGameData();
+        resetGame(); // Set initial state
+    </script>
+</body>
+</html>
