@@ -119,7 +119,7 @@
         const startButton = document.getElementById('start-button');
         const resetButton = document.getElementById('reset-button');
 
-        let allCountries = []; // This will store our country data
+        let allCountries = []; 
         let foundCountries = new Set();
         let startTime;
         let timerInterval;
@@ -162,7 +162,7 @@
             { name: "Lebanon", iso: "LB" }, { name: "Lesotho", iso: "LS" }, { name: "Liberia", iso: "LR" },
             { name: "Libya", iso: "LY" }, { name: "Liechtenstein", iso: "LI" }, { name: "Lithuania", iso: "LT" },
             { name: "Luxembourg", iso: "LU" }, { name: "Madagascar", iso: "MG" }, { name: "Malawi", iso: "MW" },
-            { name: "Malaysia", iso: "MY" }, { name: "Maldives", iso: "MV" }, { name: "Malawi", iso: "MW" },
+            { name: "Malaysia", iso: "MY" }, { name: "Maldives", iso: "MV" }, { name: "Mali", iso: "ML" },
             { name: "Malta", iso: "MT" }, { name: "Marshall Islands", iso: "MH" }, { name: "Mauritania", iso: "MR" },
             { name: "Mauritius", iso: "MU" }, { name: "Mexico", iso: "MX" }, { name: "Micronesia", iso: "FM" },
             { name: "Moldova", iso: "MD" }, { name: "Monaco", iso: "MC" }, { name: "Mongolia", iso: "MN" },
@@ -231,8 +231,8 @@
         function initializeGameData() {
             countryData.forEach(country => {
                 const lowerName = country.name.toLowerCase();
-                allCountries.push({ name: lowerName, iso: country.iso });
-                countryNameToIso.set(lowerName, country.iso); // Still useful for internal lookups
+                allCountries.push({ name: lowerName, iso: country.iso }); 
+                countryNameToIso.set(lowerName, country.iso); 
                 allCountryNamesLower.add(lowerName);
             });
 
@@ -270,7 +270,7 @@
             resetButton.textContent = 'Play Again';
 
             // Custom pop-up message!
-            setTimeout(() => { // Small delay to allow feedback message to appear first
+            setTimeout(() => { 
                 alert("Good job Chanel, love you lots <3");
             }, 100);
         }
@@ -286,7 +286,7 @@
         function checkCountry() {
             const rawInputText = countryInput.value.trim();
             const lowerCaseInput = rawInputText.toLowerCase();
-            countryInput.value = ''; // Clear input after submission
+            countryInput.value = ''; 
 
             if (!gameRunning) return;
 
