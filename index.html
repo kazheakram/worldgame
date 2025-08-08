@@ -74,6 +74,37 @@
             color: #f56565; /* Red for incorrect */
         }
 
+        .found-countries-list {
+            max-height: 200px; /* Limit height */
+            overflow-y: auto; /* Enable scrolling if too many countries */
+            background-color: #1a202c;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #4a5568;
+        }
+
+        .found-countries-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap; /* Allow items to wrap */
+            gap: 8px; /* Space between items */
+            justify-content: center; /* Center the items */
+        }
+
+        .found-countries-list li {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: nowrap; /* Prevent breaking lines within a country name */
+        }
+
+
         button {
             background-color: #63b3ed; /* Button primary color */
             color: white;
@@ -108,6 +139,10 @@
         <div id="feedback-message" class="feedback"></div>
         <button id="start-button">Start Game</button>
         <button id="reset-button" style="display:none;">Reset Game</button>
+        <div class="found-countries-list">
+            <p style="text-align: center; margin-bottom: 5px; font-weight: 600;">Found Countries:</p>
+            <ul id="found-countries-ul"></ul>
+        </div>
     </div>
 
     <script>
@@ -118,8 +153,9 @@
         const totalCountDisplay = document.getElementById('total-count');
         const startButton = document.getElementById('start-button');
         const resetButton = document.getElementById('reset-button');
+        const foundCountriesUl = document.getElementById('found-countries-ul'); // New: Reference to the UL element
 
-        let allCountries = []; 
+        let allCountries = [];
         let foundCountries = new Set();
         let startTime;
         let timerInterval;
@@ -231,8 +267,8 @@
         function initializeGameData() {
             countryData.forEach(country => {
                 const lowerName = country.name.toLowerCase();
-                allCountries.push({ name: lowerName, iso: country.iso }); 
-                countryNameToIso.set(lowerName, country.iso); 
+                allCountries.push({ name: lowerName, iso: country.iso });
+                countryNameToIso.set(lowerName, country.iso);
                 allCountryNamesLower.add(lowerName);
             });
 
@@ -252,6 +288,7 @@
             foundCountDisplay.textContent = 0;
             countryInput.value = '';
             feedbackMessage.textContent = '';
+            foundCountriesUl.innerHTML = ''; // Clear the list of found countries
             startButton.style.display = 'none';
             resetButton.style.display = 'inline-block';
             countryInput.disabled = false;
@@ -270,7 +307,7 @@
             resetButton.textContent = 'Play Again';
 
             // Custom pop-up message!
-            setTimeout(() => { 
+            setTimeout(() => {
                 alert("Good job Chanel, love you lots <3");
             }, 100);
         }
@@ -283,10 +320,17 @@
                 `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
+        function addFoundCountryToList(countryName) {
+            const listItem = document.createElement('li');
+            listItem.textContent = countryName;
+            foundCountriesUl.appendChild(listItem);
+            foundCountriesUl.scrollTop = foundCountriesUl.scrollHeight; // Scroll to bottom
+        }
+
         function checkCountry() {
             const rawInputText = countryInput.value.trim();
             const lowerCaseInput = rawInputText.toLowerCase();
-            countryInput.value = ''; 
+            countryInput.value = '';
 
             if (!gameRunning) return;
 
@@ -312,6 +356,7 @@
                     feedbackMessage.textContent = `"${officialCountryNameLower.toUpperCase()}" found!`;
                     feedbackMessage.className = 'feedback correct';
                     foundCountDisplay.textContent = foundCountries.size;
+                    addFoundCountryToList(officialCountryNameLower.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')); // Add to list, capitalize first letter of each word
 
                     if (foundCountries.size === countryData.length) {
                         endGame();
@@ -334,6 +379,7 @@
             timeDisplay.textContent = '00:00';
             countryInput.value = '';
             feedbackMessage.textContent = '';
+            foundCountriesUl.innerHTML = ''; // Clear the list on reset
             countryInput.disabled = true;
             startButton.style.display = 'inline-block';
             resetButton.style.display = 'none';
