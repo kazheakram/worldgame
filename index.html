@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Map Typing Game</title>
+    <title>World Map Typing Game for my chanel <3 </title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* CSS for the Dark Blue Theme and Poppins Font */
@@ -76,7 +76,7 @@
 
         .map-container {
             width: 100%;
-            /* Maintain aspect ratio for the map, common for world maps is ~2:1 width/height */
+            /* Maintain aspect ratio for the , common for world maps is ~2:1 width/height */
             padding-bottom: 50%; /* 50% of width for 2:1 aspect ratio */
             position: relative;
             background-color: #3b4556; /* Placeholder for map area */
@@ -85,8 +85,7 @@
             overflow: hidden; /* Ensure map doesn't spill over */
         }
 
-        .\
-<?xml version="1.0" encoding="utf-8"?>
+        .map-container svg { <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1"
      xmlns="http://www.w3.org/2000/svg"
@@ -495,7 +494,6 @@
     <path id="zw" d="M468.52,578.226l7.755,8.757l5.946,1.513l3.984-6.248l-0.312-8.281l-6.465-3.337l-2.431,1.098l-3.62,5.524l-5.014-0.053L468.52,578.226L468.52,578.226z"/>
 </g>
 </svg>
-{
             position: absolute;
             top: 0;
             left: 0;
@@ -506,7 +504,7 @@
 
         /* Styling for the SVG map countries */
         /* IMPORTANT: Make sure your downloaded SVG's country paths have the class 'country'
-                     or adjust the selector below (e.g., 'path') */
+                     and an 'id' matching its ISO 2-letter code (e.g., id="US") */
         .country {
             fill: #63b3ed; /* Default country color */
             stroke: #2d3748; /* Border between countries */
@@ -553,16 +551,6 @@
         <div id="feedback-message" class="feedback"></div>
         <div class="map-container" id="map-container">
             <svg viewBox="0 0 1000 500">
-                <path id="US" class="country" d="M366.6,183.9l0.9,0.3l-0.3-0.9L366.6,183.9z M367.6,184l0.1,0.1l-0.1-0.1L367.6,184zM366.6,183.9l0.9,0.3l-0.3-0.9L366.6,183.9z M367.6,184l0.1,0.1l-0.1-0.1L367.6,184z" data-name="United States"/>
-                <path id="CA" class="country" d="M381.1,135.5l0.1-0.5l-0.5,0.1L381.1,135.5z M381.5,135.2l0.2-0.3l-0.3,0.2L381.5,135.2z" data-name="Canada"/>
-                <path id="MX" class="country" d="M346.7,249.7l0,0.1l-0.1,0L346.7,249.7z M347.1,249.9l0.1,0l0,0.1L347.1,249.9z" data-name="Mexico"/>
-                <path id="BR" class="country" d="M473.4,438.3l-0.1-0.1l0.1,0.1L473.4,438.3z M474.2,437.8l-0.1-0.1l0.1,0.1L474.2,437.8z" data-name="Brazil"/>
-                <path id="GB" class="country" d="M578.8,172.6l-0.1,0l0,0.1L578.8,172.6z M579.1,172.5l-0.1,0l0,0.1L579.1,172.5z" data-name="United Kingdom"/>
-                <path id="FR" class="country" d="M589.6,197.8l-0.1,0.1l0.1,0.1L589.6,197.8z M590.2,197.7l-0.1,0.1l0.1,0.1L590.2,197.7z" data-name="France"/>
-                <path id="DE" class="country" d="M604.3,184.2l-0.1,0.1l0.1,0.1L604.3,184.2z M604.8,184.1l-0.1,0.1l0.1,0.1L604.8,184.1z" data-name="Germany"/>
-                <path id="RU" class="country" d="M809.1,98.6l-0.1,0l0,0.1L809.1,98.6z M809.7,98.5l-0.1,0l0,0.1L809.7,98.5z" data-name="Russia"/>
-                <path id="IN" class="country" d="M801.4,302.5l-0.1,0.1l0.1,0.1L801.4,302.5z M801.9,302.4l-0.1,0.1l0.1,0.1L801.9,302.4z" data-name="India"/>
-                <path id="AU" class="country" d="M900.2,388.5l-0.1,0.1l0.1,0.1L900.2,388.5z M900.8,388.4l-0.1,0.1l0.1,0.1L900.8,388.4z" data-name="Australia"/>
                 </svg>
         </div>
         <button id="start-button">Start Game</button>
